@@ -66,7 +66,7 @@ learn.unfreeze()
 lrs = slice(lr/400,lr/4)
 #TODO: Change # of steps
 learn.fit_one_cycle(100, lrs, pct_start=0.8)
-# learn.save('stage-2-weights')
+learn.save('stage-2-weights')
 
 interp = SegmentationInterpretation.from_learner(learn)
 mean_cm, single_img_cm = interp._generate_confusion()
