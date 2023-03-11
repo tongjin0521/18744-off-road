@@ -59,23 +59,21 @@ def colorfull_fast(frame):
   return frame
 
 import timeit
-# Count variables
-fqtd = 0
 
+# filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
+path_rst = path/'results_test'
 filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
 
 filenames.sort() # ADD THIS LINE
 
 for img in filenames:
   frame = cv.imread(img)
-
+  
   #%timeit colorfull_fast(frame)
   
   frame = colorfull_fast(frame)
-  name = "%09d.png"%fqtd
+  name = f'{img}'.split("/")[-1]
   cv.imwrite(os.path.join(path_crst, name), frame)
-
-  fqtd += 1
-  print(fqtd)
+  print(name)
 
 print("Done!")

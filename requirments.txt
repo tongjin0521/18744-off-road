@@ -4,3 +4,4 @@ torchvision == 0.5.0
 fastai == 1.0.61
 numpy == 1.23
 opencv-python
+tqdm
