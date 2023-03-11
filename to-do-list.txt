@@ -1,6 +1,5 @@
 *smoothen the final output image
 *fine-tune the model
-*import more data (without ground truth though)
-*semi-supervised learning (threshold, save figs&masks)
+*semi-supervised learning automation
 *video generation for mid presentation
 *line drawing 
