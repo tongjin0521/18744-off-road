@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="torch.nn.functio
 path = Path('../')
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
-path_img_unlabled = path/'images_unlabled_Part01'
+path_img_unlabled = path/'orig_images_unlabled_Part01'
 path_lbl = path/'labels'
 
 fnames = get_image_files(path_img)

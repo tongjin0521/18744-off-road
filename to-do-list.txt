@@ -1,5 +1,5 @@
 *smoothen the final output image
 *fine-tune the model
-*semi-supervised learning automation
+*change weights based on new numbers of various kinds
 *video generation for mid presentation
 *line drawing 
