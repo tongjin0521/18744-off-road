@@ -65,12 +65,6 @@ learn.save('stage-1')
 learn.load('stage-1')
 learn.show_results(rows=5, figsize=(15,15))
 
-interp = SegmentationInterpretation.from_learner(learn)
-top_losses, top_idxs = interp.top_losses((288,352))
-mean_cm, single_img_cm = interp._generate_confusion()
-df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
-plt.savefig('confusion.png')
-
 #training without weights
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
@@ -78,3 +72,9 @@ lrs = slice(lr/400,lr/4)
 #TODO: # of iterations = 100 (previously)
 learn.fit_one_cycle(100, lrs, pct_start=0.9)
 learn.save('stage-2')
+
+interp = SegmentationInterpretation.from_learner(learn)
+top_losses, top_idxs = interp.top_losses((288,352))
+mean_cm, single_img_cm = interp._generate_confusion()
+df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
+plt.savefig('confusion.png')

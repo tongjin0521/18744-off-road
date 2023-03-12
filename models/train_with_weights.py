@@ -74,10 +74,6 @@ mean_cm, single_img_cm = interp._generate_confusion()
 df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
 # single image class performance
 plt.savefig('global_confusion_with_weights.png')
-i = 130
-df = interp._plot_intersect_cm(single_img_cm[i], f"Ratio of Intersection given True Label, Image:{i}")
 
-# show xyz
-interp.show_xyz(i)
 
 learn.interpret
