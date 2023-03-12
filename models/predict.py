@@ -6,7 +6,7 @@ from fastai.utils.mem import *
 import torch
 torch.backends.cudnn.benchmark=True
 import numpy as np
-
+from tqdm import tqdm
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="torch.nn.functional")
 
@@ -43,41 +43,20 @@ data = (src.transform(get_transforms(), size=size, tfm_y=True)
 
 learn = unet_learner(data, models.resnet34)
 learn.load('stage-2-weights')
-interp = SegmentationInterpretation.from_learner(learn)
-mean_cm, single_img_cm = interp._generate_confusion()
-
-# global class performance
-df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
-
-# single image class performance
-i = 130
-df = interp._plot_intersect_cm(single_img_cm[i], f"Ratio of Intersection given True Label, Image:{i}")
-
-# show xyz
-interp.show_xyz(i)
-
-learn.show_results()
-
-img_f = fnames[0]
-img = open_image(img_f)
-prediction = learn.predict(img)
 
 results_save = 'results'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 
 def save_preds(names):
-    i=0
     #names = dl.dataset.items
     
-    for b in names:
-        img_s = fnames[i]
+    for fname_i in tqdm(names):
+        img_s = fname_i
         img_toSave = open_image(img_s)
         img_split = f'{img_s}'
         img_split = img_split.split("/")[-1]
         predictionSave = learn.predict(img_toSave)
         predictionSave[0].save(path_rst/img_split) #Save Image
-        i += 1
-        print(i)
-
+        
 save_preds(fnames)

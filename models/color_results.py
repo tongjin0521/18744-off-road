@@ -5,8 +5,9 @@ import cv2 as cv
 cv.__version__
 
 from pathlib import Path
+from tqdm import tqdm
 
-colored_results = 'results_color_test'
+colored_results = 'results_color'
 path = Path('../')
 path_crst = path/colored_results
 path_crst.mkdir(exist_ok=True)
@@ -60,13 +61,12 @@ def colorfull_fast(frame):
 
 import timeit
 
-# filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
-path_rst = path/'results_test'
+# path_rst = path/'results_test'
 filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
 
 filenames.sort() # ADD THIS LINE
 
-for img in filenames:
+for img in tqdm(filenames):
   frame = cv.imread(img)
   
   #%timeit colorfull_fast(frame)
@@ -74,6 +74,5 @@ for img in filenames:
   frame = colorfull_fast(frame)
   name = f'{img}'.split("/")[-1]
   cv.imwrite(os.path.join(path_crst, name), frame)
-  print(name)
 
 print("Done!")

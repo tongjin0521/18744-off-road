@@ -44,7 +44,7 @@ learn = unet_learner(data, models.resnet34)
 learn.load('stage-2-weights')
 
 #create test directory
-results_save = 'results_test'
+results_save = 'labels'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 
@@ -67,6 +67,6 @@ for unlabled_name_i in tqdm(unlabled_names):
                 shutil.copyfile(f'{img_s}', "../images/"+img_split)
                 num_next_round_imgs+=1
                 predictionSave[0].save(path_rst/img_split) #Save Image
-                break
+                # break
 
 print(num_next_round_imgs)

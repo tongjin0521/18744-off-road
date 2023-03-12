@@ -59,7 +59,8 @@ plt.savefig('loss_plot.png')
 
 # lr is set based on the fig above
 lr=1e-3
-learn.fit_one_cycle(10, slice(lr), pct_start=0.9)
+#TODO: # of iterations = 10 (previously)
+learn.fit_one_cycle(1, slice(lr), pct_start=0.9)
 learn.save('stage-1')
 learn.load('stage-1')
 learn.show_results(rows=5, figsize=(15,15))
@@ -73,5 +74,7 @@ plt.savefig('confusion.png')
 #training without weights
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
-learn.fit_one_cycle(100, lrs, pct_start=0.9)
+
+#TODO: # of iterations = 100 (previously)
+learn.fit_one_cycle(1, lrs, pct_start=0.9)
 learn.save('stage-2')
