@@ -65,7 +65,7 @@ lr=1e-5
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
 #TODO: Change # of steps 100 previously
-learn.fit_one_cycle(1, lrs, pct_start=0.8)
+learn.fit_one_cycle(100, lrs, pct_start=0.8)
 learn.save('stage-2-weights')
 
 interp = SegmentationInterpretation.from_learner(learn)
