@@ -1,5 +1,12 @@
-*smoothen the final output image
-*fine-tune the model
+Improvements on the model:
+#preprocessing:
+   1. crop images
+   2. lightning
+#fine tune the model (# of iteration steps, different base model, weight decay)
 *change weights based on new numbers of various kinds
-*video generation for mid presentation
+*start over training or start from previous ones
+
+Output:
+*smoothen the final output image
 *line drawing 
+*video generation for mid presentation

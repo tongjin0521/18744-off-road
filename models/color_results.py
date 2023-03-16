@@ -64,7 +64,7 @@ import timeit
 # path_rst = path/'results_test'
 filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
 
-filenames.sort() # ADD THIS LINE
+filenames.sort(reverse=True) # ADD THIS LINE
 
 for img in tqdm(filenames):
   frame = cv.imread(img)

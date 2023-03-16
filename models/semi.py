@@ -51,6 +51,7 @@ path_rst.mkdir(exist_ok=True)
 #predict image
 num_next_round_imgs = 0
 for unlabled_name_i in tqdm(unlabled_names):
+# for unlabled_name_i in unlabled_names:
         img_s =unlabled_name_i
         img_toSave = open_image(img_s)
         img_split = f'{img_s}'
@@ -58,11 +59,13 @@ for unlabled_name_i in tqdm(unlabled_names):
         predictionSave = learn.predict(img_toSave)
         pred_prob = predictionSave[2]
         pred_prob = torch.max(pred_prob,dim=0)[0]
-        # print(torch.mean(pred_prob),torch.min(pred_prob),torch.median(pred_prob))
+        
         mean_prob = torch.mean(pred_prob)
         min_prob = torch.min(pred_prob)
+
+        # print(mean_prob,min_prob)
         #TODO: how to select next round labeled data
-        if (mean_prob > 0.975 and min_prob > 0.21):
+        if (mean_prob > 0.99 and min_prob > 0.3):
                 # print(num_next_round_imgs)
                 shutil.copyfile(f'{img_s}', "../images/"+img_split)
                 num_next_round_imgs+=1

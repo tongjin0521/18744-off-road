@@ -49,32 +49,33 @@ def acc_rtk(input, target):
     return (input.argmax(dim=1)[mask]==target[mask]).float().mean()
     
 metrics=acc_rtk
-wd=1e0
+wd=1e-2
 
 learn = unet_learner(data, models.resnet34, metrics=metrics, wd=wd)
-
-lr_find(learn)
-learn.recorder.plot()
-plt.savefig('loss_plot.png')
+learn.load('1.5-stage-2')
+learn.unfreeze()
+# lr_find(learn)
+# learn.recorder.plot()
+# plt.savefig('1.5-loss_plot.png')
 
 # lr is set based on the fig above
 lr=1e-3
 #TODO: # of iterations = 10 (previously)
-learn.fit_one_cycle(10, slice(lr), pct_start=0.9)
-learn.save('stage-1')
-learn.load('stage-1')
-learn.show_results(rows=5, figsize=(15,15))
-
+# learn.fit_one_cycle(10, slice(lr), pct_start=0.9)
+# learn.save('1-stage-1')
+# learn.load('1-stage-1')
+# learn.show_results(rows=5, figsize=(15,15))
+# learn.load('stage-2-weights')
 #training without weights
-learn.unfreeze()
+# learn.unfreeze()
 lrs = slice(lr/400,lr/4)
 
 #TODO: # of iterations = 100 (previously)
-learn.fit_one_cycle(100, lrs, pct_start=0.9)
-learn.save('stage-2')
+learn.fit_one_cycle(20, lrs, pct_start=0.9)
+learn.save('1.5-stage-2-more')
 
 interp = SegmentationInterpretation.from_learner(learn)
 top_losses, top_idxs = interp.top_losses((288,352))
 mean_cm, single_img_cm = interp._generate_confusion()
 df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
-plt.savefig('confusion.png')
+plt.savefig('1.5-confusion-more.png')
