@@ -7,11 +7,11 @@ cv.__version__
 from pathlib import Path
 from tqdm import tqdm
 
-colored_results = 'results_color'
+colored_results = 'datasets/18102016_Part01_results_color'
 path = Path('../')
 path_crst = path/colored_results
 path_crst.mkdir(exist_ok=True)
-results_save = 'results'
+results_save = 'datasets/18102016_Part01_results'
 path_rst = path/results_save
 
 import cv2 as cv
@@ -64,7 +64,7 @@ import timeit
 # path_rst = path/'results_test'
 filenames = [img for img in glob.glob(str(path_rst/"*.png"))]
 
-filenames.sort(reverse=True) # ADD THIS LINE
+filenames.sort() # ADD THIS LINE
 
 for img in tqdm(filenames):
   frame = cv.imread(img)

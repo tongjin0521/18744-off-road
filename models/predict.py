@@ -16,17 +16,13 @@ codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
 path_lbl = path/'labels'
 
-fnames = get_image_files(path_img)
+# fnames = get_image_files(path_img)
+fnames = get_image_files(path/'datasets/18102016_Part01')
 lbl_names = get_image_files(path_lbl)
-
-img_f = fnames[139]
 
 get_y_fn = lambda x: path_lbl/f'{x.stem}{x.suffix}'
 
-mask = open_mask(get_y_fn(img_f))
-src_size = np.array(mask.shape[1:])
-
-size = src_size
+size = np.array([288,352])
 
 free = gpu_mem_get_free_no_cache()
 # the max size of bs depends on the available GPU RAM
@@ -42,9 +38,9 @@ data = (src.transform(get_transforms(), size=size, tfm_y=True)
         .normalize(imagenet_stats))
 
 learn = unet_learner(data, models.resnet34)
-learn.load('stage-2-weights')
+learn.load('1.5-stage-2')
 
-results_save = 'results'
+results_save = 'datasets/18102016_Part01_results'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 
