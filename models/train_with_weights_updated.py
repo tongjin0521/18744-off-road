@@ -3,12 +3,6 @@ import matplotlib.pyplot as plt
 from pynvml import *
 nvmlInit()
 
-# print(torch.cuda.is_available())
-# print(torch.cuda.device_count())
-# print(torch.cuda.current_device())
-# print(torch.cuda.device(0))
-# print(torch.cuda.get_device_name(0))
-
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="torch.nn.functional")
 
@@ -46,6 +40,8 @@ print(sz)
 half = tuple(int(x/2) for x in sz)
 print(half)
 
+size = sz
+
 handle = nvmlDeviceGetHandleByIndex(0)
 info = nvmlDeviceGetMemoryInfo(handle)
 print("Free Memory: ", info.free/1048576)
@@ -56,6 +52,9 @@ if free > 8200: bs=8
 else:           bs=4
 print(f"using bs={bs}, have {free}MB of GPU RAM free")
 
+half = tuple(int(x/2) for x in sz)
+print(half)
+
 def FileSplitter(fname):
     "Split `items` depending on the value of `mask`."
     valid = Path(fname).read_text().split('\n') 
@@ -63,9 +62,6 @@ def FileSplitter(fname):
     def _inner(o, **kwargs): return FuncSplitter(_func)(o)
     return _inner
 
-'''
-First Step - Without Weights
-'''
 #Datasets
 data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
                    get_items=get_image_files,
@@ -75,7 +71,7 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-#dls.show_batch(max_n=4, vmin=1, vmax=30, figsize=(14,10), show=True)
+# dls.show_batch(max_n=4, vmin=1, vmax=30, figsize=(14,10), show=True)
 # plt.show()
 
 dls.vocab = codes
@@ -91,32 +87,34 @@ def acc_test(inp, targ):
 
 #Model
 opt = ranger
-learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
-# learn.lr_find()
+balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0]).cuda())
+learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt, loss_func=balanced_loss)
+# learn.load('stage-2')
+
+# lr = learn.lr_find()
+# print(lr)
 # plt.show()
 
-lr=1e-4
+# lr = 1e-4
 
-# learn.fit_flat_cos(10, slice(lr), pct_start=0.9)
-# learn.save('stage-1')
-learn.load('stage-1')
-#learn.show_results(max_n=4, figsize=(15,15))
-#plt.show()
+# learn.unfreeze()
+# lrs = slice(lr/400,lr/4)
+
+# learn.fit_flat_cos(12, lrs, pct_start=0.9)
+# learn.save('stage-2-weights')
+learn.load('stage-2-weights')
+# learn.show_results(max_n=4, figsize=(15,15))
+# plt.show()
 
 #Interpret
 interp = SegmentationInterpretation.from_learner(learn)
 top_losses, top_idxs = interp.top_losses()
 
-# plt.hist(to_np(top_losses), bins=20)
-# interp.plot_top_losses(10)
-# plt.show()
-
-print(top_idxs[:5])
-
-# learn.unfreeze()
-# lrs = slice(lr/400,lr/4)
-# learn.fit_flat_cos(12, lrs, pct_start=0.9)
-# learn.save('stage-2')
-learn.load('stage-2')
-learn.show_results(max_n=4, figsize=(15,15))
+plt.hist(to_np(top_losses), bins=20)
+interp.plot_top_losses(10)
 plt.show()
+
+interp._generate_confusion()
+
+plt.show()
+
