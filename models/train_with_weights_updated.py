@@ -88,23 +88,36 @@ def acc_test(inp, targ):
 #Model
 opt = ranger
 balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0]).cuda())
+# balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]).cuda())
 learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt, loss_func=balanced_loss)
-# learn.load('stage-2')
+learn.load('stage-2')
 
 # lr = learn.lr_find()
 # print(lr)
 # plt.show()
 
-# lr = 1e-4
+lr = 1e-4
 
 # learn.unfreeze()
 # lrs = slice(lr/400,lr/4)
 
-# learn.fit_flat_cos(12, lrs, pct_start=0.9)
+# learn.fit_flat_cos(100, lrs, pct_start=0.8)
 # learn.save('stage-2-weights')
-learn.load('stage-2-weights')
+# learn.load('stage-2-weights')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
+
+'''
+Continue Training - 600 epochs currently
+'''
+learn.load('stage-2-weights')
+learn.unfreeze()
+lrs = slice(lr/400,lr/4)
+learn.fit_flat_cos(100, lrs, pct_start=0.8)
+learn.save('stage-2-weights')
+learn.load('stage-2-weights')
+learn.show_results(max_n=4, figsize=(15,15))
+plt.show()
 
 #Interpret
 interp = SegmentationInterpretation.from_learner(learn)
@@ -112,9 +125,13 @@ top_losses, top_idxs = interp.top_losses()
 
 plt.hist(to_np(top_losses), bins=20)
 interp.plot_top_losses(10)
-plt.show()
-
-interp._generate_confusion()
+plt.savefig('with weights top losses.png')
 
 plt.show()
+
+print(interp)
+
+# interp.plot_confusion_matrix()
+
+# plt.show()
 

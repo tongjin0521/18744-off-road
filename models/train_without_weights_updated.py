@@ -99,19 +99,11 @@ lr=1e-4
 
 # learn.fit_flat_cos(10, slice(lr), pct_start=0.9)
 # learn.save('stage-1')
-learn.load('stage-1')
+# learn.load('stage-1')
 #learn.show_results(max_n=4, figsize=(15,15))
 #plt.show()
 
 #Interpret
-interp = SegmentationInterpretation.from_learner(learn)
-top_losses, top_idxs = interp.top_losses()
-
-# plt.hist(to_np(top_losses), bins=20)
-# interp.plot_top_losses(10)
-# plt.show()
-
-print(top_idxs[:5])
 
 # learn.unfreeze()
 # lrs = slice(lr/400,lr/4)
@@ -119,4 +111,13 @@ print(top_idxs[:5])
 # learn.save('stage-2')
 learn.load('stage-2')
 learn.show_results(max_n=4, figsize=(15,15))
+
+interp = SegmentationInterpretation.from_learner(learn)
+top_losses, top_idxs = interp.top_losses()
+
+plt.hist(to_np(top_losses), bins=20)
+interp.plot_top_losses(10)
+plt.savefig('without weights top losses.png')
+
+print(top_idxs[:5])
 plt.show()
