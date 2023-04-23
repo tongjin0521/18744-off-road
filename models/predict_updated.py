@@ -18,6 +18,7 @@ codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
 path_lbl = path/'labels'
 
+#Dataset to predict on
 fnames = get_image_files(path/'datasets/18102016_Part01')
 print(fnames[:3])
 print(len(fnames))
@@ -78,7 +79,7 @@ dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 #Model
 opt = ranger
 learn = learn = unet_learner(dls, resnet34, self_attention=True, act_cls=Mish, opt_func=opt)
-learn.load('stage-2-weights')
+learn.load('stage-2-fullsize-weights')
 
 results_save = 'datasets/18102016_Part01_results_updated'
 path_rst = path/results_save
@@ -103,13 +104,10 @@ path_rst.mkdir(exist_ok=True)
 
 dl = learn.dls.test_dl(fnames)
 preds = learn.get_preds(dl=dl)
-print(preds[0].shape)
-print(len(codes))
 
-pred_1 = preds[0][0]
-print(pred_1.shape)
-
-pred_arx = pred_1.argmax(dim=0)
-plt.imshow(pred_arx)
-plt.show()
+for i, pred in enumerate(preds[0]):
+    pred_arg = pred.argmax(dim=0).numpy()
+    rescaled = (255.0 / pred_arg.max() * (pred_arg - pred_arg.min())).astype(np.uint8)
+    im = Image.fromarray(rescaled)
+    im.save(path_rst/f'Image_{i}.png')
 
