@@ -19,7 +19,7 @@ path_img = path/'images'
 path_lbl = path/'labels'
 
 #Dataset to predict on
-fnames = get_image_files(path/'datasets/18102016_Part01')
+fnames = get_image_files(path/'datasets/14042017_Part06')
 print(fnames[:3])
 print(len(fnames))
 
@@ -31,10 +31,6 @@ img = PILImage.create(img_f)
 # plt.show()
 
 get_y_fn = lambda x: path_lbl/f'{x.stem}{x.suffix}'
-
-mask = PILMask.create(get_y_fn(img_f))
-#mask.show(figsize=(5,5), alpha=1)
-# plt.show()
 
 sz = np.array([288,352])
 print(sz)
@@ -78,7 +74,7 @@ opt = ranger
 learn = learn = unet_learner(dls, resnet34, self_attention=True, act_cls=Mish, opt_func=opt)
 learn.load('stage-2-fullsize-weights')
 
-results_save = 'datasets/18102016_Part01_results_updated'
+results_save = 'datasets/14042017_Part06_results_updated'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 

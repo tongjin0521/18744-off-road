@@ -1,7 +1,5 @@
 import os
 import glob
-import base64
-from matplotlib import pyplot as plt
 import cv2 as cv
 cv.__version__
 import torch
@@ -10,11 +8,11 @@ from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
 
-colored_results = 'datasets/18102016_Part01_results_updated_color'
+colored_results = 'datasets/14042017_Part06_results_updated_color'
 path = Path('../')
 path_crst = path/colored_results
 path_crst.mkdir(exist_ok=True)
-results_save = 'datasets/18102016_Part01_results_updated'
+results_save = 'datasets/14042017_Part06_results_updated'
 path_rst = path/results_save
 
 import cv2 as cv
@@ -82,20 +80,4 @@ for tensor in tqdm(filenames):
   im.save(os.path.join(path_crst, name))
   cv.imwrite(os.path.join(path_crst, name), frame)
 
-# frame = cv.imread(filenames[0])
-#print(frame)
-  
-#%timeit colorfull_fast(frame)
-
-# frame = torch.load(filenames[0]).numpy()
-  
-# frame = colorfull_fast(frame)
-# plt.imshow(frame)
-# plt.show()
-
-# name = f'{filenames[0]}'.split("\\")[-1]
-# print(name)
-# res = cv.imwrite(os.path.join(path_crst, name), frame)
-
-# print(os.path.join(path_crst, name))
 print("Done!")
