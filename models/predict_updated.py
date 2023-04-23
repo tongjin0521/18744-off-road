@@ -39,9 +39,6 @@ mask = PILMask.create(get_y_fn(img_f))
 sz = np.array([288,352])
 print(sz)
 
-half = tuple(int(x/2) for x in sz)
-print(half)
-
 size = sz
 
 handle = nvmlDeviceGetHandleByIndex(0)
@@ -69,7 +66,7 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
                    get_items=get_image_files,
                    splitter=FileSplitter(path/'valid.txt'),
                    get_y=get_y_fn,
-                   batch_tfms=[*aug_transforms(size=half), Normalize.from_stats(*imagenet_stats)])
+                   batch_tfms=[*aug_transforms(size=sz), Normalize.from_stats(*imagenet_stats)])
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
@@ -85,29 +82,10 @@ results_save = 'datasets/18102016_Part01_results_updated'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 
-# def save_preds(names):
-#     #names = dl.dataset.items
-    
-#     for fname_i in tqdm(names):
-#         img_s = fname_i
-#         img_toSave = load_image(img_s)
-#         img_split = f'{img_s}'
-#         img_split = img_split.split("/")[-1]
-#         print(img_split)
-#         predictionSave = learn.get_preds(img_toSave)
-#         print(predictionSave.shape)
-#         predictionSave = predictionSave[0].numpy()
-#         im = Image.fromarray(predictionSave)
-#         im.save(path_rst/img_split) #Save Image
-        
-# save_preds(fnames)
-
 dl = learn.dls.test_dl(fnames)
 preds = learn.get_preds(dl=dl)
 
 for i, pred in enumerate(preds[0]):
-    pred_arg = pred.argmax(dim=0).numpy()
-    rescaled = (255.0 / pred_arg.max() * (pred_arg - pred_arg.min())).astype(np.uint8)
-    im = Image.fromarray(rescaled)
-    im.save(path_rst/f'Image_{i}.png')
+    pred_arg = pred.argmax(dim=0)
+    torch.save(pred_arg, path_rst/f'Image_{i}.pt')
 
