@@ -23,22 +23,15 @@ path_img = path/'images'
 path_lbl = path/'labels'
 
 fnames = get_image_files(path_img)
-print(fnames[:3])
-print(len(fnames))
 
 lbl_names = get_image_files(path_lbl)
 
 img_f = fnames[139]
 img = PILImage.create(img_f)
-#img.show(figsize=(5,5))
-# plt.show()
 
 get_y_fn = lambda x: path_lbl/f'{x.stem}{x.suffix}'
 
 mask = PILMask.create(get_y_fn(img_f))
-# mask.show(figsize=(5,5), alpha=1)
-# plt.show()
-print(tensor(mask))
 
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 
@@ -54,10 +47,10 @@ def FileSplitter(fname):
 First round, will train at half the image size
 '''
 sz = mask.shape
-print(sz)
+# print(sz)
 
 half = tuple(int(x/2) for x in sz)
-print(half)
+# print(half)
 
 #Determine batch size based on avaiable GPU mem
 handle = nvmlDeviceGetHandleByIndex(0)
@@ -66,7 +59,7 @@ print("Free Memory: ", info.free/1048576)
 
 free = info.free/1048576
 # the max size of bs depends on the available GPU RAM
-if free > 8200: bs=8
+if free > 16400: bs=16
 else:           bs=4
 print(f"using bs={bs}, have {free}MB of GPU RAM free")
 
@@ -88,7 +81,7 @@ dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 dls.vocab = codes
 
 name2id = {v:k for k,v in enumerate(codes)}
-print(name2id)
+# print(name2id)
 
 #Accuracy Function
 void_code = name2id['manholeCover']
@@ -98,16 +91,16 @@ def acc_test(inp, targ):
     return (inp.argmax(dim=1)[mask]==targ[mask]).float().mean()
 
 #Model
-# opt = ranger
-# learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
+opt = ranger
+learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
 # learn.lr_find()
 # plt.show()
 
-# lr=1e-4
+lr=1e-4
 
 # learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-# learn.save('stage-1-new')
-# learn.load('stage-1-new')
+# learn.save('semi-1-stage-1')
+# learn.load('semi-1-stage-1')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
@@ -115,8 +108,8 @@ def acc_test(inp, targ):
 # lrs = slice(lr/400,lr/4)
 # learn.unfreeze()
 # learn.fit_flat_cos(12, lrs, pct_start=0.72)
-# learn.save('stage-2-new')
-# learn.load('stage-2-new')
+# learn.save('semi-1-stage-2')
+learn.load('semi-1-stage-2')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
@@ -136,9 +129,9 @@ def acc_test(inp, targ):
 #     im = Image.fromarray(rescaled)
 #     im.save(path_rst/f'Image_{i}.png')
 
-'''
-Train with full size images
-'''
+# '''
+# Train with full size images
+# '''
 data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
                    get_items=get_image_files,
                    splitter=FileSplitter(path/'valid.txt'),
@@ -156,20 +149,20 @@ learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_c
 
 lr=1e-4
 
-# learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-# learn.save('stage-2-fullsize')
+learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
+learn.save('semi-1-stage-2-fullsize')
 
-# learn.unfreeze()
+learn.unfreeze()
 lrs = slice(lr/400,lr/4)
-# learn.fit_flat_cos(10, lrs, pct_start=0.72)
+learn.fit_flat_cos(10, lrs, pct_start=0.72)
+learn.save('semi-1-stage-2-fullsize-more')
+learn.show_results(max_n=4, figsize=(15,15))
+plt.show()
+
+# # Train a bit more
+# learn.load('stage-2-fullsize-more')
+# learn.unfreeze()
+# learn.fit_flat_cos(20, lrs, pct_start=0.72)
 # learn.save('stage-2-fullsize-more')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
-
-# Train a bit more
-learn.load('stage-2-fullsize-more')
-learn.unfreeze()
-learn.fit_flat_cos(20, lrs, pct_start=0.72)
-learn.save('stage-2-fullsize-more')
-learn.show_results(max_n=4, figsize=(15,15))
-plt.show()
