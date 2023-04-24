@@ -3,3 +3,4 @@ images/models/*.pth
 !datasets/14042017_Part06_results_color/*.png
 !datasets/18102016_Part01_results_color/*.png
 *.pth
+*.pt
