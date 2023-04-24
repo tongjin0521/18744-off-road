@@ -89,6 +89,7 @@ learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_c
 # print(lr)
 # plt.show()
 
+#TODO: increase this to lower loss faster
 lr = 1e-5
 
 # learn.unfreeze()

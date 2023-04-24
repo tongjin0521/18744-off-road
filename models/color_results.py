@@ -78,6 +78,6 @@ for tensor in tqdm(filenames):
  
   im = Image.fromarray(frame)
   im.save(os.path.join(path_crst, name))
-  cv.imwrite(os.path.join(path_crst, name), frame)
+  # cv.imwrite(os.path.join(path_crst, name), frame)
 
 print("Done!")

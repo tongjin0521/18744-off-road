@@ -43,7 +43,7 @@ print("Free Memory: ", info.free/1048576)
 
 free = info.free/1048576
 # the max size of bs depends on the available GPU RAM
-if free > 8200: bs=8
+if free > 16400: bs=16
 else:           bs=4
 print(f"using bs={bs}, have {free}MB of GPU RAM free")
 
@@ -81,7 +81,7 @@ path_rst.mkdir(exist_ok=True)
 dl = learn.dls.test_dl(fnames)
 preds = learn.get_preds(dl=dl)
 
-for i, pred in enumerate(preds[0]):
+for i, pred in tqdm(enumerate(preds[0])):
     pred_arg = pred.argmax(dim=0)
     torch.save(pred_arg, path_rst/f'Image_{i}.pt')
 
