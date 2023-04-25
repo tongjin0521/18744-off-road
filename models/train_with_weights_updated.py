@@ -11,31 +11,23 @@ Preparing the Data
 '''
 # Set path variables
 path = Path('../')
-print(path.ls())
 
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
 path_lbl = path/'labels'
 
 fnames = get_image_files(path_img)
-print(fnames[:3])
-print(len(fnames))
 
 lbl_names = get_image_files(path_lbl)
 
 img_f = fnames[139]
 img = PILImage.create(img_f)
-#img.show(figsize=(5,5))
-# plt.show()
 
 get_y_fn = lambda x: path_lbl/f'{x.stem}{x.suffix}'
 
 mask = PILMask.create(get_y_fn(img_f))
-#mask.show(figsize=(5,5), alpha=1)
-# plt.show()
 
 sz = mask.shape
-print(sz)
 
 handle = nvmlDeviceGetHandleByIndex(0)
 info = nvmlDeviceGetMemoryInfo(handle)
@@ -64,13 +56,9 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-# dls.show_batch(max_n=4, vmin=1, vmax=30, figsize=(14,10), show=True)
-# plt.show()
-
 dls.vocab = codes
 
 name2id = {v:k for k,v in enumerate(codes)}
-print(name2id)
 
 #Accuracy Function
 void_code = name2id['manholeCover']
@@ -81,49 +69,40 @@ def acc_test(inp, targ):
 
 #Model
 opt = ranger
-balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0]).cuda())
+# Prev weights: 1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0
+# Sem1 weights: 1.0,4.125,6.103,7.781,82.157,1242.283,3861.897,1392.764,3861.897,321.246,2571.229,1134.873,214.103
+balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,4.26,5.202,8.48,85.44,1357.86,3320.93,415.94,3320.93,350.6,2532.23,1228.75,222.53]).cuda())
 learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt, loss_func=balanced_loss)
-# learn.load('stage-2-fullsize-more')
+# learn.load('semi-2-stage-2-fullsize-more')
 
-# lr = learn.lr_find()
+# lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
 # print(lr)
 # plt.show()
 
-#TODO: increase this to lower loss faster
-lr = 1e-5
+lr = 1e-4
 
+# learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
+# learn.save('semi-2-stage-2-fullsize-weights')
+# learn.show_results(max_n=4, figsize=(15,15))
+# plt.show()
+
+# learn.load('semi-2-stage-2-fullsize-weights')
 # learn.unfreeze()
 # lrs = slice(lr/400,lr/4)
 
-# learn.fit_flat_cos(20, lrs, pct_start=0.72)
-# learn.save('stage-2-fullsize-weights')
+# learn.fit_flat_cos(10, lrs, pct_start=0.72)
+# learn.save('semi-2-stage-2-fullsize-weights-more')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
 '''
-Continue Training - 400 epochs currently
+Continue Training - 100 epochs currently, semi 2
 '''
-learn.load('stage-2-fullsize-weights')
-# learn.unfreeze()
-# lrs = slice(lr/400,lr/4)
-# learn.fit_flat_cos(50, lrs, pct_start=0.72)
-# learn.save('stage-2-fullsize-weights')
+learn.load('semi-2-stage-2-fullsize-weights-more')
+learn.unfreeze()
+lrs = slice(lr/400,lr/4)
+learn.fit_flat_cos(25, lrs, pct_start=0.72)
+learn.save('semi-2-stage-2-fullsize-weights-more')
 learn.show_results(max_n=4, figsize=(15,15))
 plt.show()
-
-# #Interpret
-# interp = SegmentationInterpretation.from_learner(learn)
-# top_losses, top_idxs = interp.top_losses()
-
-# plt.hist(to_np(top_losses), bins=20)
-# interp.plot_top_losses(10)
-# plt.savefig('with weights top losses.png')
-
-# plt.show()
-
-# print(interp)
-
-# interp.plot_confusion_matrix()
-
-# plt.show()
 
