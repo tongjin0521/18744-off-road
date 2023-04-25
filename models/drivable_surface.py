@@ -62,6 +62,7 @@ def draw_drivable_region(frame):
 
     # If there is no roadmarking
     if not np.any(frame == (4, 4, 4)):
+    # if True:
         # Create a new array filled with white
         result = np.full_like(frame, white)
         # Mark driveable region as dark green
@@ -104,6 +105,5 @@ filenames.sort() # ADD THIS LINE
 for img in (filenames):
   frame = cv.imread(img)
   frame = draw_drivable_region(frame)
-  name = f'{img}'.split("/")[-1]
-  cv.imwrite(os.path.join(path_drst, name), frame)
+  cv.imwrite(os.path.join(path_drst, os.path.basename(img)), frame)
 print("Done!")
