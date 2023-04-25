@@ -57,8 +57,8 @@ def draw_drivable_region(frame):
     grey = (128, 128, 128)
     # Create mask for driveable region and dangerous zones
     driveable_mask = np.logical_or.reduce((frame == (1, 1, 1), frame == (2, 2, 2), frame == (3, 3, 3)))
-    dangerous_mask = np.logical_or.reduce((frame == (5, 5, 5),frame == (11, 11, 11),frame == (12, 12, 12)))
-    caution_mask = np.logical_or.reduce((  frame == (6, 6, 6), frame == (7, 7, 7), frame == (8, 8, 8),frame == (9, 9, 9),frame == (10, 10, 10)))
+    dangerous_mask = np.logical_or.reduce((frame == (5, 5, 5),frame == (11, 11, 11),frame == (12, 12, 12),frame == (10, 10, 10)))
+    caution_mask = np.logical_or.reduce((  frame == (6, 6, 6), frame == (7, 7, 7), frame == (8, 8, 8),frame == (9, 9, 9)))
 
     # If there is no roadmarking
     if not np.any(frame == (4, 4, 4)):

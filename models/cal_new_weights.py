@@ -14,7 +14,7 @@ import numpy as np
 
 
 path = Path('../')
-masks_folder = 'test_mask'
+masks_folder = 'labels'
 path_rst = path/masks_folder
 
 width = 288
@@ -25,6 +25,7 @@ def process_image(path, counts):
     img = cv.imread(path)
     # grab the image dimensions
     # loop over the image, pixel by pixel
+    # print(path)
     for x in range(width):
         for y in range(height):
             r,g,b = img[x, y]
@@ -34,10 +35,11 @@ def count_pixels(folder_path):
     img_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
     counts = [0]*13
 
-    for img_path in img_paths:
+    for img_path in tqdm(img_paths):
         process_image(img_path, counts)
-        print(counts)
+        # print(counts)
     return counts
+
 
 
 # path_rst = path/'results_test'

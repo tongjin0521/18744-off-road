@@ -51,29 +51,29 @@ def acc_rtk(input, target):
     
 metrics=acc_rtk
 wd=1e-2
-
-balanced_loss = CrossEntropyFlat(axis=1, weight=torch.tensor([1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0]).cuda())
+# original: [1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0]
+balanced_loss = CrossEntropyFlat(axis=1, weight=torch.tensor([1.0, 3.931212662932062, 5.632422694820342, 10.019201220167792, 100.47387065515574, 1610.1775298920968, 5040.747489348752, 2215.535361979602, 5040.747489348752, 409.29332583797674, 3255.962700869821, 1475.0998530590432, 278.74084965670437]).cuda())
 learn = unet_learner(data, models.resnet34, metrics=metrics, loss_func=balanced_loss, wd=wd)
-learn.load('1-stage-2')
+learn.load('1.5-stage-2')
 #CUDA_LAUNCH_BLOCKING=1
 
 lr_find(learn)
 learn.recorder.plot()
-plt.savefig('1-loss_plot_with_weights.png')
+plt.savefig('1.5-loss_plot_with_weights.png')
 
 lr=1e-5
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
 #TODO: Change # of steps 100 previously
-learn.fit_one_cycle(100, lrs, pct_start=0.8)
-learn.save('1-stage-2-weights')
+learn.fit_one_cycle(60, lrs, pct_start=0.8)
+learn.save('1.5-stage-2-weights')
 
 interp = SegmentationInterpretation.from_learner(learn)
 mean_cm, single_img_cm = interp._generate_confusion()
 # global class performance
 df = interp._plot_intersect_cm(mean_cm, "Mean of Ratio of Intersection given True Label")
 # single image class performance
-plt.savefig('1-global_confusion_with_weights.png')
+plt.savefig('1.5-global_confusion_with_weights.png')
 
 
 learn.interpret
