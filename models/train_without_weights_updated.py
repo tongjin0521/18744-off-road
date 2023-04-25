@@ -3,12 +3,6 @@ import matplotlib.pyplot as plt
 from pynvml import *
 nvmlInit()
 
-# print(torch.cuda.is_available())
-# print(torch.cuda.device_count())
-# print(torch.cuda.current_device())
-# print(torch.cuda.device(0))
-# print(torch.cuda.get_device_name(0))
-
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="torch.nn.functional")
 
@@ -17,7 +11,6 @@ Preparing the Data
 '''
 # Set path variables
 path = Path('../')
-print(path.ls())
 
 path_img = path/'images'
 path_lbl = path/'labels'
@@ -47,10 +40,8 @@ def FileSplitter(fname):
 First round, will train at half the image size
 '''
 sz = mask.shape
-# print(sz)
 
 half = tuple(int(x/2) for x in sz)
-# print(half)
 
 #Determine batch size based on avaiable GPU mem
 handle = nvmlDeviceGetHandleByIndex(0)
@@ -75,13 +66,9 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-#dls.show_batch(max_n=4, vmin=1, vmax=30, figsize=(14,10), show=True)
-# plt.show()
-
 dls.vocab = codes
 
 name2id = {v:k for k,v in enumerate(codes)}
-# print(name2id)
 
 #Accuracy Function
 void_code = name2id['manholeCover']
@@ -91,25 +78,24 @@ def acc_test(inp, targ):
     return (inp.argmax(dim=1)[mask]==targ[mask]).float().mean()
 
 #Model
-opt = ranger
-learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
-# learn.lr_find()
+# opt = ranger
+# learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
+# lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
+# print(lr)
 # plt.show()
 
-lr=1e-4
+# lr=1e-4
 
 # learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-# learn.save('semi-1-stage-1')
-# learn.load('semi-1-stage-1')
+# learn.save('semi-2-stage-1')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
-
+# learn.load('semi-2-stage-1')
 # lrs = slice(lr/400,lr/4)
 # learn.unfreeze()
 # learn.fit_flat_cos(12, lrs, pct_start=0.72)
-# learn.save('semi-1-stage-2')
-learn.load('semi-1-stage-2')
+# learn.save('semi-2-stage-2')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
@@ -129,9 +115,9 @@ learn.load('semi-1-stage-2')
 #     im = Image.fromarray(rescaled)
 #     im.save(path_rst/f'Image_{i}.png')
 
-# '''
-# Train with full size images
-# '''
+'''
+Train with full size images
+'''
 data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
                    get_items=get_image_files,
                    splitter=FileSplitter(path/'valid.txt'),
@@ -140,17 +126,20 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-opt = ranger
 dls.vocab = codes
+
+opt = ranger
 learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
 
-# learn.lr_find()
+# lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
+# print(lr)
 # plt.show()
 
-lr=1e-4
+lr=7.59e-5
 
+learn.load('semi-2-stage-2')
 learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-learn.save('semi-1-stage-2-fullsize')
+learn.save('semi-2-stage-2-fullsize')
 
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
