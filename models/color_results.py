@@ -1,23 +1,19 @@
 import os
 import glob
-import cv2 as cv
-cv.__version__
 import torch
 from PIL import Image
-
+import numpy as np
 from pathlib import Path
 from tqdm import tqdm
 
-colored_results = 'datasets/14042017_Part06_results_updated_color'
+# 18102016_Part01
+# 14042017_Part06
+colored_results = 'datasets/14042017_Part06_pre_semi_no_weights_color'
 path = Path('../')
 path_crst = path/colored_results
 path_crst.mkdir(exist_ok=True)
-results_save = 'datasets/14042017_Part06_results_updated'
+results_save = 'datasets/14042017_Part06_pre_semi_no_weights'
 path_rst = path/results_save
-
-import cv2 as cv
-import numpy as np
-
 
 def colorfull_fast(frame):
   # grab the image dimensions
@@ -56,8 +52,6 @@ def colorfull_fast(frame):
       elif pixel == 12: #cracks
         image[x, y] = (255,85,0)
   
-  image = cv.cvtColor(image,cv.COLOR_BGR2RGB)
-  
   # return the colored image
   return image
 
@@ -69,8 +63,6 @@ filenames.sort() # ADD THIS LINE
 for tensor in tqdm(filenames):
   frame = torch.load(tensor).numpy()
   
-  #%timeit colorfull_fast(frame)
-  
   frame = colorfull_fast(frame)
   name = f'{tensor}'.split("\\")[-1]
   name = os.path.splitext(name)[0]+'.png'
@@ -78,6 +70,5 @@ for tensor in tqdm(filenames):
  
   im = Image.fromarray(frame)
   im.save(os.path.join(path_crst, name))
-  # cv.imwrite(os.path.join(path_crst, name), frame)
 
 print("Done!")

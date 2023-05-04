@@ -1,7 +1,6 @@
 from fastai.vision.all import *
 from pynvml import *
 from tqdm import tqdm
-from PIL import Image
 nvmlInit()
 
 import warnings
@@ -12,28 +11,25 @@ Preparing the Data
 '''
 # Set path variables
 path = Path('../')
-print(path.ls())
 
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
 path_lbl = path/'labels'
 
+# 18102016_Part01
+# 14042017_Part06
+
 #Dataset to predict on
 fnames = get_image_files(path/'datasets/14042017_Part06')
-print(fnames[:3])
-print(len(fnames))
 
 lbl_names = get_image_files(path_lbl)
 
 img_f = fnames[139]
 img = PILImage.create(img_f)
-#img.show(figsize=(5,5))
-# plt.show()
 
 get_y_fn = lambda x: path_lbl/f'{x.stem}{x.suffix}'
 
 sz = np.array([288,352])
-print(sz)
 
 size = sz
 
@@ -46,9 +42,6 @@ free = info.free/1048576
 if free > 16400: bs=16
 else:           bs=4
 print(f"using bs={bs}, have {free}MB of GPU RAM free")
-
-half = tuple(int(x/2) for x in sz)
-print(half)
 
 def FileSplitter(fname):
     "Split `items` depending on the value of `mask`."
@@ -66,15 +59,12 @@ data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
 
 dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-# dls.show_batch(max_n=4, vmin=1, vmax=30, figsize=(14,10), show=True)
-# plt.show()
-
 #Model
 opt = ranger
 learn = learn = unet_learner(dls, resnet34, self_attention=True, act_cls=Mish, opt_func=opt)
-learn.load('stage-2-fullsize-weights')
+learn.load('pre-semi-stage-2-fullsize')
 
-results_save = 'datasets/14042017_Part06_results_updated'
+results_save = 'datasets/14042017_Part06_pre_semi_weights'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 
