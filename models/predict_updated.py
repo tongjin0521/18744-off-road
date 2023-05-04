@@ -1,7 +1,6 @@
 from fastai.vision.all import *
 from pynvml import *
 from tqdm import tqdm
-from PIL import Image
 nvmlInit()
 
 import warnings
@@ -16,6 +15,9 @@ path = Path('../')
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
 path_lbl = path/'labels'
+
+# 18102016_Part01
+# 14042017_Part06
 
 #Dataset to predict on
 fnames = get_image_files(path/'datasets/14042017_Part06')
@@ -60,9 +62,9 @@ dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 #Model
 opt = ranger
 learn = learn = unet_learner(dls, resnet34, self_attention=True, act_cls=Mish, opt_func=opt)
-learn.load('semi-2-stage-2-fullsize-weights-more')
+learn.load('pre-semi-stage-2-fullsize')
 
-results_save = 'datasets/14042017_Part06_results_updated_semi_2'
+results_save = 'datasets/14042017_Part06_pre_semi_weights'
 path_rst = path/results_save
 path_rst.mkdir(exist_ok=True)
 

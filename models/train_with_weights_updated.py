@@ -70,39 +70,28 @@ def acc_test(inp, targ):
 #Model
 opt = ranger
 # Prev weights: 1.0,5.0,6.0,7.0,75.0,1000.0,3100.0,3300.0,0.0,270.0,2200.0,1000.0,180.0
-# Sem1 weights: 1.0,4.125,6.103,7.781,82.157,1242.283,3861.897,1392.764,3861.897,321.246,2571.229,1134.873,214.103
-balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0,4.26,5.202,8.48,85.44,1357.86,3320.93,415.94,3320.93,350.6,2532.23,1228.75,222.53]).cuda())
+balanced_loss = CrossEntropyLossFlat(axis=1, weight=torch.tensor([1.0, 4.263497264686588, 5.125022123661737, 8.666757001259429, 89.18227332451582, 1492.554405275663, 2879.4152946679137, 1125.6312555996417, 2879.4152946679137, 367.74888591534153, 2587.1779365412904, 1264.4682044119459, 177.91633623878664]).cuda())
 learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt, loss_func=balanced_loss)
-# learn.load('semi-2-stage-2-fullsize-more')
+learn.load('semi-1-plus-stage-2-fullsize')
 
 # lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
 # print(lr)
 # plt.show()
 
-lr = 1e-4
+lr = 8.32e-6
 
-# learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-# learn.save('semi-2-stage-2-fullsize-weights')
+learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
+learn.save('semi-1-plus-stage-2-fullsize-weights')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
 
-# learn.load('semi-2-stage-2-fullsize-weights')
-# learn.unfreeze()
-# lrs = slice(lr/400,lr/4)
-
-# learn.fit_flat_cos(10, lrs, pct_start=0.72)
-# learn.save('semi-2-stage-2-fullsize-weights-more')
-# learn.show_results(max_n=4, figsize=(15,15))
-# plt.show()
-
-'''
-Continue Training - 100 epochs currently, semi 2
-'''
-learn.load('semi-2-stage-2-fullsize-weights-more')
+learn.load('semi-1-plus-stage-2-fullsize-weights')
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
-learn.fit_flat_cos(25, lrs, pct_start=0.72)
-learn.save('semi-2-stage-2-fullsize-weights-more')
-learn.show_results(max_n=4, figsize=(15,15))
-plt.show()
+
+# Train the model for 75 epochs
+learn.fit_flat_cos(75, lrs, pct_start=0.72)
+learn.save('semi-1-plus-stage-2-fullsize-weights')
+# learn.show_results(max_n=4, figsize=(15,15))
+# plt.show()
 

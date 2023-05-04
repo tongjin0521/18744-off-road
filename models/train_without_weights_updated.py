@@ -57,16 +57,16 @@ print(f"using bs={bs}, have {free}MB of GPU RAM free")
 '''
 First Step - Without Weights (half size images)
 '''
-#Datasets
-data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
-                   get_items=get_image_files,
-                   splitter=FileSplitter(path/'valid.txt'),
-                   get_y=get_y_fn,
-                   batch_tfms=[*aug_transforms(size=half), Normalize.from_stats(*imagenet_stats)])
+# Datasets
+# data = DataBlock(blocks=(ImageBlock, MaskBlock(codes)),
+#                    get_items=get_image_files,
+#                    splitter=FileSplitter(path/'valid.txt'),
+#                    get_y=get_y_fn,
+#                    batch_tfms=[*aug_transforms(size=half), Normalize.from_stats(*imagenet_stats)])
 
-dls = data.dataloaders(path_img, bs=bs, num_workers=0)
+# dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 
-dls.vocab = codes
+# dls.vocab = codes
 
 name2id = {v:k for k,v in enumerate(codes)}
 
@@ -80,40 +80,25 @@ def acc_test(inp, targ):
 #Model
 # opt = ranger
 # learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
+
 # lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
 # print(lr)
 # plt.show()
 
-# lr=1e-4
+# lr=9.12e-5
 
 # learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-# learn.save('semi-2-stage-1')
-# learn.show_results(max_n=4, figsize=(15,15))
-# plt.show()
+# learn.save('semi-1-plus-stage-1')
+# # learn.show_results(max_n=4, figsize=(15,15))
+# # plt.show()
 
-# learn.load('semi-2-stage-1')
+# learn.load('semi-1-plus-stage-1')
 # lrs = slice(lr/400,lr/4)
 # learn.unfreeze()
 # learn.fit_flat_cos(12, lrs, pct_start=0.72)
-# learn.save('semi-2-stage-2')
+# learn.save('semi-1-plus-stage-2')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()
-
-## Inference
-# results_save = 'datasets/stage_2_results/'
-# path_rst = path/results_save
-# path_rst.mkdir(exist_ok=True)
-
-# dl = learn.dls.test_dl(fnames)
-# preds = learn.get_preds(dl=dl)
-# print(preds[0].shape)
-# print(len(codes))
-
-# for i, pred in enumerate(preds[0]):
-#     pred_arg = pred.argmax(dim=0).numpy()
-#     rescaled = (255.0/pred_arg.max()*(pred_arg - pred_arg.min())).astype(np.uint8)
-#     im = Image.fromarray(rescaled)
-#     im.save(path_rst/f'Image_{i}.png')
 
 '''
 Train with full size images
@@ -130,28 +115,21 @@ dls.vocab = codes
 
 opt = ranger
 learn = unet_learner(dls, resnet34, metrics=acc_test, self_attention=True, act_cls=Mish, opt_func=opt)
+learn.load('semi-1-plus-stage-2')
 
 # lr = learn.lr_find(suggest_funcs=(valley, slide, minimum))
 # print(lr)
 # plt.show()
 
-lr=7.59e-5
+lr=2.75e-4
 
-learn.load('semi-2-stage-2')
 learn.fit_flat_cos(10, slice(lr), pct_start=0.72)
-learn.save('semi-2-stage-2-fullsize')
+learn.save('semi-1-plus-stage-2-fullsize')
 
+learn.load('semi-1-plus-stage-2-fullsize')
 learn.unfreeze()
 lrs = slice(lr/400,lr/4)
-learn.fit_flat_cos(10, lrs, pct_start=0.72)
-learn.save('semi-1-stage-2-fullsize-more')
-learn.show_results(max_n=4, figsize=(15,15))
-plt.show()
-
-# # Train a bit more
-# learn.load('stage-2-fullsize-more')
-# learn.unfreeze()
-# learn.fit_flat_cos(20, lrs, pct_start=0.72)
-# learn.save('stage-2-fullsize-more')
+learn.fit_flat_cos(20, lrs, pct_start=0.72)
+learn.save('semi-1-plus-stage-2-fullsize')
 # learn.show_results(max_n=4, figsize=(15,15))
 # plt.show()

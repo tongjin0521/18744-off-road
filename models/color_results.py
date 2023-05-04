@@ -1,23 +1,19 @@
 import os
 import glob
-import cv2 as cv
-cv.__version__
 import torch
 from PIL import Image
-
+import numpy as np
 from pathlib import Path
 from tqdm import tqdm
 
-colored_results = 'datasets/18102016_Part01_results_updated_semi_2_color'
+# 18102016_Part01
+# 14042017_Part06
+colored_results = 'datasets/14042017_Part06_pre_semi_no_weights_color'
 path = Path('../')
 path_crst = path/colored_results
 path_crst.mkdir(exist_ok=True)
-results_save = 'datasets/18102016_Part01_results_updated_semi_2'
+results_save = 'datasets/14042017_Part06_pre_semi_no_weights'
 path_rst = path/results_save
-
-import cv2 as cv
-import numpy as np
-
 
 def colorfull_fast(frame):
   # grab the image dimensions

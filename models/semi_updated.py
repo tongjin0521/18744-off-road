@@ -21,7 +21,7 @@ path = Path('../')
 
 codes = np.loadtxt(path/'codes.txt', dtype=str)
 path_img = path/'images'
-path_img_unlabled = path/'original_unlabled_images'
+path_img_unlabled = path/'temp'
 path_lbl = path/'labels'
 
 fnames = get_image_files(path_img)
@@ -61,7 +61,7 @@ dls = data.dataloaders(path_img, bs=bs, num_workers=0)
 #Model
 opt = ranger
 learn = learn = unet_learner(dls, resnet34, self_attention=True, act_cls=Mish, opt_func=opt)
-learn.load('stage-2-fullsize-weights')
+learn.load('pre-semi-stage-2-fullsize-weights')
 
 #Create Mask Function
 def colorfull_fast(frame):
@@ -110,6 +110,8 @@ def colorfull_fast(frame):
 
 #Predict image
 num_next_round_imgs = 0
+mean_sum = 0
+min_sum = 0
 
 dl = learn.dls.test_dl(unlabeled_names)
 preds = learn.get_preds(dl=dl)
@@ -117,17 +119,22 @@ preds = learn.get_preds(dl=dl)
 for i, pred in enumerate(preds[0]):
     img_s = unlabeled_names[i]
     img_split = f'{img_s}'
+    # Change this "1_" for the semilearning iteration
     img_split = "1_" + img_split.split("\\")[-1]
     
     pred_prob = torch.max(pred, dim=0)[0]
     mean_prob = torch.mean(pred_prob)
     min_prob = torch.min(pred_prob)
 
-    if (mean_prob > 0.98 and min_prob > 0.2):
-        shutil.copyfile(f'{img_s}', "../images/" + img_split)
+    mean_sum += mean_prob
+    min_sum += min_prob
+    print(mean_prob, min_prob)
+
+    if (mean_prob > 0.9 and min_prob > 0.16):
         num_next_round_imgs += 1
         
-        #Create the label
+        #Create the label (Comment out when not needed)
+        shutil.copyfile(f'{img_s}', "../images/" + img_split)
         pred_arg = pred.argmax(dim=0).numpy()
         pred_arg = colorfull_fast(pred_arg)
 
@@ -135,5 +142,5 @@ for i, pred in enumerate(preds[0]):
         im.save(path_lbl/img_split)
 
 #Print number of added images
-print(num_next_round_imgs)
-
+print("# of images to be added: ", num_next_round_imgs)
+print("Mean Prob: ", mean_sum/len(unlabeled_names), "Mean of Min Prob: ", min_sum/len(unlabeled_names))
